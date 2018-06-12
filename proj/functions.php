@@ -51,12 +51,12 @@ function pageContent()
 {
     $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 
-    $path = getcwd().'/'.config('content_path').'content/'.$page.'.php';
+    $path = getcwd().'/'.config('content_path').'/'.$page.'.php';
 
     if (file_exists(filter_var($path, FILTER_SANITIZE_URL))) {
         include $path;
     } else {
-        include config('content_path').'content/404.php';
+        include config('content_path').'/404.php';
     }
 }
 
