@@ -5,4 +5,3 @@ require 'functions.php';
 
 run();
 
-?>
