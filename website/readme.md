@@ -4,7 +4,7 @@ I put together this project while introducing a friend of mine to PHP. I decided
 
 This project is meant for absolute beginners. I've intentionally kept it the most minimal possible while introducing some separation of concerns.
 
-## Concepts 
+## Concepts.. practice assignment. 
 
 The project covers these concepts:
 
