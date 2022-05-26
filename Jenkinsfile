@@ -1,22 +1,3 @@
-Skip to content
- 
-Search…
-All gists
-Back to GitHub
-@narendar27 
-@allebb
-allebb/Jenkinsfile
-Created 2 years ago • Report abuse
-1
-0
-Code
-Revisions
-1
-Stars
-1
-<script src="https://gist.github.com/allebb/2ece4acf3b3fb2df540c967eb14fd9b6.js"></script>
-A Jenkinsfile demonstating a build pipeline in Jenkins using Docker Agents for multiple PHP version testing.
-Jenkinsfile
 pipeline {
   agent any
   stages {
