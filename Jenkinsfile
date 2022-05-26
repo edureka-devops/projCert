@@ -29,4 +29,5 @@ pipeline {
             sh 'chmod -R a+w $PWD && chmod -R a+w $WORKSPACE'
             junit 'report/*.xml'
           }
+        }
 }
