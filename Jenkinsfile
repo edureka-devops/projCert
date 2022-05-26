@@ -28,7 +28,10 @@ pipeline {
             sh 'php $WORKSPACE/vendor/bin/phpunit --coverage-html $WORKSPACE/report/clover --coverage-clover $WORKSPACE/report/clover.xml --log-junit $WORKSPACE/report/junit.xml'
             sh 'chmod -R a+w $PWD && chmod -R a+w $WORKSPACE'
             junit 'report/*.xml'
+            }
           }
         }
       }
+    }
+  }
 }
