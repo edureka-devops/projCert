@@ -1,0 +1,21 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('copy php from git') {
+            steps {
+                echo "copying project to workspace"
+                git 'https://github.com/itonix/DevopsprojCertification1.git'
+                sh 'pwd'
+            }
+        }
+        stages('building docker image') {
+            steps {
+                sh 'sudo docker build -t tonygeorgethomas/php_web .'
+        }
+            
+        }
+       
+    
+    }
+}
