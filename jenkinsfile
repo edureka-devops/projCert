@@ -9,12 +9,24 @@ pipeline {
                 sh 'pwd'
             }
         }
-        stages('building docker image') {
+        stage('building docker image') {
             steps {
                 sh 'sudo docker build -t tonygeorgethomas/php_web .'
         }
             
         }
+        stage('docker image pushing to tonygeorgethomas/php_web repo') {
+             steps {
+                withCredentials([string(credentialsId: 'dockerhubpwd', variable: 'mypasswd')]) {
+                sh 'docker login -u tonygeorgethomas -p ${mypasswd}'
+                sh 'docker push tonygeorgethomas/php_web'
+}
+
+
+
+             }
+        }
+        
        
     
     }
