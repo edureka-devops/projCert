@@ -1,9 +1,9 @@
 # Configure the AWS Provider
 provider "aws" {
     region = "ap-south-1"
-    access_key = "AKIAUNZ22WZRKOHYJGB7"
+    access_key = ""
     # XXX: no example found in the provider docs
-    secret_key = "H9Uf2WEC2UEWXWy7cmw69aQMobw3LaOhtgYxjWUF"
+    secret_key = ""
   
 }
 
