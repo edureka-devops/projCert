@@ -14,6 +14,7 @@ resource "aws_vpc" "myvpc" {
     Name = "myvpc"
   }
 }
+#creating subnet mysubnet
 resource "aws_subnet" "mysubnet" {
   vpc_id     = aws_vpc.myvpc.id
   cidr_block = "10.0.1.0/24"
@@ -25,18 +26,26 @@ resource "aws_subnet" "mysubnet" {
     Name = "my_subnet"
   }
 }
+#creating gateway
 resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.myvpc.id
-
+  depends_on = [aws.vpc.myvpc]
   tags = {
     Name = "my_gateway"
   }
 }
+#creating routetable
 resource "aws_route_table" "myroutetable" {
   vpc_id = aws_vpc.myvpc.id
   tags = {
     Name = "my_routetable"
   }
+}
+resource "aws_route" "myroute" {
+  route_table_id            = "aws_route_table.myroutetable.id"
+  destination_cidr_block    = "0.0.0.0/0"
+  gateway_id = aws_internet_gateway.gw.id
+  depends_on                = [aws_route_table.testing]
 }
 #root table association
 resource "aws_route_table_association" "a" {
@@ -44,44 +53,100 @@ resource "aws_route_table_association" "a" {
   route_table_id = aws_route_table.myroutetable.id
 }
 
-resource "aws_key_pair" "deployer" {
-  key_name   = "deployer-key"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD3F6tyPEFEzV0LX3X8BsXdMsQz1x2cEikKDEY0aIj41qgxMCP/iteneqXSIFZBp5vizPvaoIR3Um9xK7PGoW8giupGn+EPuxIA4cDM4vzOqOkiMPhz5XK0whEjkVzTo4+S0puvDZuwIsdiW9mxhJc7tgBNL0cYlWSYVkz4G/fslNfRPW5mYAM49f4fhtxPb5ok4Q2Lg9dPKVHO/Bgeu5woMc7RY0p1ej6D4CKFE6lymSDJpW0YHX/wqE9+cfEauh7xZcG0q9t2ta6F6fmX0agvpFyZo8aFbXeUBr7osSCJNgvavWbM/06niWrOvYX2xwWdhXmXSrbX8ZbabVohBK41 email@example.com"
-}
-resource "aws_instance" "php_web" {
-  ami           = "ami-0d81306eddc614a45" 
-  instance_type = "t2.micro"
-  tags = {
-    Name = "php_web"
-  }
-}
-resource "aws_security_group" "allow_tls" {
-  name        = "allow_tls"
-  description = "Allow TLS inbound traffic"
-  vpc_id      = aws_vpc.main.id
+resource "aws_security_group" "allow_web" {
+  name        = "allow_web_traffic"
+  description = "Allow web inbound traffic"
+  vpc_id      = aws_vpc.myvpc.id
 
   ingress {
-    description      = "TLS from VPC"
+    description      = "HTTPS"
     from_port        = 443
     to_port          = 443
     protocol         = "tcp"
-    cidr_blocks      = [aws_vpc.main.cidr_block]
-    ipv6_cidr_blocks = [aws_vpc.main.ipv6_cidr_block]
+    cidr_blocks      = ["0.0.0.0/0"]
+    
   }
-
+    ingress {
+    description      = "HTTPS"
+    from_port        = 443
+    to_port          = 443
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+    
+  }
+    ingress {
+    description      = "HTTP"
+    from_port        = 80
+    to_port          = 80
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+    
+  }
+  ingress {
+    description      = "ssh"
+    from_port        = 22
+    to_port          = 22
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+    
+  }
   egress {
     from_port        = 0
     to_port          = 0
     protocol         = "-1"
     cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
   }
 
   tags = {
-    Name = "allow_tls"
+    Name = "allow_web"
   }
 }
+# RSA key of size 4096 bits
+resource "tls_private_key" "myserverkey" {
+  algorithm = "RSA"
+}
 
+resource "aws_key_pair" "app-instance-key" {
+
+ key_name = "web-key"
+ public_key = tls_private_key.web-key.public_key_openssh
+}
+
+# save the key to local
+
+resource local_file "web-key" {
+
+ content = tls_private_key.web-key.private_key_pem
+ filename = "web-key.pem"
+}
+
+resource "aws_instance" "web" {
+  ami           = var.ami
+  instance_type = var.instance_type
+  count = 1
+  tags = {
+    Name = "${var.environment}-${count.index}"
+  }
+  subnet_id = aws_subnet.subnet-1.id
+  key_name = "web-key"
+  security_groups = [aws_security_group.allow_web.id]
+
+  provisioner "remote-exec" {
+    connection {
+     type = "ssh"
+     user = "ec2-user"
+     private_key = tls_private_key.web-key.private_key_pem
+     host = aws_instance.web[0].public_ip
+    }
+  inline = [
+    "sudo yum install httpd php git -y",
+    "sudo systemctl restart httpd",
+    "sudo systemctl enable httpd"
+  ]
+
+
+}
+}
 
 
 
