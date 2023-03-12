@@ -1,25 +1,25 @@
 # Configure the AWS Provider
 provider "aws" {
     region = "ap-south-1"
-    access_key = ""
+    access_key = "AKIAUNZ22WZRKOHYJGB7"
     # XXX: no example found in the provider docs
-    secret_key = ""
+    secret_key = "H9Uf2WEC2UEWXWy7cmw69aQMobw3LaOhtgYxjWUF"
   
 }
 
 # Create a VPC
-resource "aws_vpc" "myvpc" {
+resource "aws_vpc" "my_vpc" {
   cidr_block = "10.0.0.0/16"
   tags = {
     Name = "myvpc"
   }
 }
 #creating subnet mysubnet
-resource "aws_subnet" "mysubnet" {
-  vpc_id     = aws_vpc.myvpc.id
+resource "aws_subnet" "my_subnet" {
+  vpc_id     = aws_vpc.my_vpc.id
   cidr_block = "10.0.1.0/24"
   map_public_ip_on_launch = true
-  depends_on = [aws.vpc.myvpc]
+  depends_on = [aws_vpc.my_vpc]
   availability_zone = "ap-south-1a"
 
   tags = {
@@ -28,35 +28,34 @@ resource "aws_subnet" "mysubnet" {
 }
 #creating gateway
 resource "aws_internet_gateway" "gw" {
-  vpc_id = aws_vpc.myvpc.id
-  depends_on = [aws.vpc.myvpc]
+  vpc_id = aws_vpc.my_vpc.id
+  depends_on = [aws_vpc.my_vpc]
   tags = {
     Name = "my_gateway"
   }
 }
 #creating routetable
-resource "aws_route_table" "myroutetable" {
-  vpc_id = aws_vpc.myvpc.id
+resource "aws_route_table" "my_route-table" {
+  vpc_id = aws_vpc.my_vpc.id
   tags = {
-    Name = "my_routetable"
+    Name = "my_route-table"
   }
 }
-resource "aws_route" "myroute" {
-  route_table_id            = "aws_route_table.myroutetable.id"
+resource "aws_route" "my_route" {
+  route_table_id            = aws_route_table.my_route-table.id
   destination_cidr_block    = "0.0.0.0/0"
   gateway_id = aws_internet_gateway.gw.id
-  depends_on                = [aws_route_table.testing]
 }
 #root table association
 resource "aws_route_table_association" "a" {
-  subnet_id      = aws_subnet.mysubnet.id
-  route_table_id = aws_route_table.myroutetable.id
+  subnet_id      = aws_subnet.my_subnet.id
+  route_table_id = aws_route_table.my_route-table.id
 }
 
 resource "aws_security_group" "allow_web" {
   name        = "allow_web_traffic"
   description = "Allow web inbound traffic"
-  vpc_id      = aws_vpc.myvpc.id
+  vpc_id      = aws_vpc.my_vpc.id
 
   ingress {
     description      = "HTTPS"
@@ -66,20 +65,12 @@ resource "aws_security_group" "allow_web" {
     cidr_blocks      = ["0.0.0.0/0"]
     
   }
-    ingress {
-    description      = "HTTPS"
-    from_port        = 443
-    to_port          = 443
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-    
-  }
-    ingress {
-    description      = "HTTP"
-    from_port        = 80
-    to_port          = 80
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
+   ingress {
+      description      = "HTTP"
+      from_port        = 80
+      to_port          = 80
+      protocol         = "tcp"
+      cidr_blocks      = ["0.0.0.0/0"]
     
   }
   ingress {
@@ -102,32 +93,33 @@ resource "aws_security_group" "allow_web" {
   }
 }
 # RSA key of size 4096 bits
-resource "tls_private_key" "myserverkey" {
+resource "tls_private_key" "my_serverkey" {
   algorithm = "RSA"
 }
 
 resource "aws_key_pair" "app-instance-key" {
 
  key_name = "web-key"
- public_key = tls_private_key.web-key.public_key_openssh
+ public_key = tls_private_key.my_serverkey.public_key_openssh
 }
 
 # save the key to local
 
 resource local_file "web-key" {
-
- content = tls_private_key.web-key.private_key_pem
+ content = tls_private_key.my_serverkey.private_key_pem
  filename = "web-key.pem"
+
 }
 
+
 resource "aws_instance" "web" {
-  ami           = var.ami
-  instance_type = var.instance_type
+  ami           = "ami-0d81306eddc614a45"
+  instance_type = "t2.micro"
   count = 1
   tags = {
-    Name = "${var.environment}-${count.index}"
+    Name = "projetserver"
   }
-  subnet_id = aws_subnet.subnet-1.id
+  subnet_id = aws_subnet.my_subnet.id
   key_name = "web-key"
   security_groups = [aws_security_group.allow_web.id]
 
@@ -135,7 +127,7 @@ resource "aws_instance" "web" {
     connection {
      type = "ssh"
      user = "ec2-user"
-     private_key = tls_private_key.web-key.private_key_pem
+     private_key = tls_private_key.my_serverkey.private_key_pem
      host = aws_instance.web[0].public_ip
     }
   inline = [
