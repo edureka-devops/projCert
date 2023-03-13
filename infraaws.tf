@@ -1,9 +1,9 @@
-# Configure the AWS Provider
+
+#configuring aws accesss
 provider "aws" {
-  shared_credentials_files = "~/.aws/credentials"
-    # XXX: no example found in the provider docs
-    
-  
+ shared_credentials_file = "~/.aws/credentials"
+
+# XXX: no example found in the provider docs
 }
 
 # Create a VPC
@@ -69,9 +69,17 @@ resource "aws_security_group" "allow_web" {
       from_port        = 80
       to_port          = 80
       protocol         = "tcp"
-      cidr_blocks      = ["0.0.0.0/0"]
-    
-  }
+      cidr_blocks      = ["0.0.0.0/0"] 
+}
+  ingress {
+      description = "container port"
+      from_port   = 44500
+      to_port     = 44500
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+
+ }  
+  
   ingress {
     description      = "ssh"
     from_port        = 22
@@ -110,7 +118,6 @@ resource local_file "web-key" {
 
 }
 
-
 resource "aws_instance" "web" {
   ami           = "ami-0d81306eddc614a45"
   instance_type = "t2.micro"
@@ -132,8 +139,13 @@ resource "aws_instance" "web" {
   inline = [
     "sudo yum install httpd php git -y",
     "sudo systemctl restart httpd",
-    "sudo systemctl enable httpd"
+    "sudo systemctl enable httpd",
+    "sudo yum install docker -y",
+    "sudo systemctl start docker",
+    "sudo docker run -d -p 44500:80 tonygeorgethomas/php_web:latest"
+   
   ]
 
 
+}
 }
