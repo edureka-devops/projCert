@@ -1,9 +1,8 @@
 # Configure the AWS Provider
 provider "aws" {
-    region = "ap-south-1"
-    access_key = ""
+  shared_credentials_files = "~/.aws/credentials"
     # XXX: no example found in the provider docs
-    secret_key = ""
+    
   
 }
 
