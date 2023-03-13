@@ -1,8 +1,12 @@
-//deployment script
+//parametrized jenkins terraform pipe line to deploy image to ec2 instance 
 pipeline {
     tools {
   terraform 'myterraform'
 }
+   parameters {
+  choice choices: ['apply', 'destroy'], description: 'Do you want to apply or destroy?', name: 'action'
+}
+
 
     agent any
 
@@ -26,7 +30,7 @@ pipeline {
         }
         stage('teraform provisioning changes') {
             steps{
-                sh 'sudo terraform apply -auto-approve'
+                sh 'sudo terraform ${action} -auto-approve'
             }
         }
     }    
