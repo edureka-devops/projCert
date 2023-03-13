@@ -1,33 +1,33 @@
+//deployment script
 pipeline {
+    tools {
+  terraform 'myterraform'
+}
+
     agent any
 
     stages {
-        stage('copy php from git') {
+        stage('loading scripts for terraform') {
             steps {
-                echo "copying project to workspace"
-                git 'https://github.com/itonix/DevopsprojCertification1.git'
-                sh 'pwd'
+                echo 'cloning repo'
+                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/itonix/DevopsprojCertification1.git']])
             }
         }
-        stage('building docker image') {
+        stage('initializing terraform ') {
             steps {
-                sh 'sudo docker build -t tonygeorgethomas/php_web .'
+                sh 'sudo terraform init'
+                
+            }
         }
-            
+        stage('terrafom validating') {
+            steps{
+            sh 'sudo terraform validate'
+            }
         }
-        stage('docker image pushing to tonygeorgethomas/php_web repo') {
-             steps {
-                withCredentials([string(credentialsId: 'dockerhubpwd', variable: 'mypasswd')]) {
-                sh 'docker login -u tonygeorgethomas -p ${mypasswd}'
-                sh 'docker push tonygeorgethomas/php_web'
-}
-
-
-
-             }
+        stage('teraform provisioning changes') {
+            steps{
+                sh 'sudo terraform apply -auto-approve'
+            }
         }
-        
-       
-    
-    }
+    }    
 }
