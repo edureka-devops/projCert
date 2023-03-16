@@ -1,0 +1,34 @@
+---
+- name: "remote install git java-jdk11 jenkins"
+  hosts: 192.168.186.135
+  tasks:
+    - name : install git,python3,openssh-server packages>>>>>>
+      ansible.builtin.yum:
+        name: "{{ item }}"
+        state: "latest"
+      loop:
+          - git
+          - python3
+          - openssh-server
+    - name: installing java-jdk11>>> and jenkins>>>>>>
+      ansible.builtin.command:
+        cmd: "{{ item }}"
+      loop:
+            - "wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo"
+            - "rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key"
+            - "yum install java-11-openjdk"
+    - name: installing >>>docker>>>>>
+      ansible.builtin.command:
+        cmd: "{{ item }}"
+      loop:
+           - "yum install -y yum-utils"
+           - "yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo"
+           - "yum install docker-ce docker-ce-cli containerd.io"
+    - name: starting docker service
+      ansible.builtin.service:
+              name: docker
+              state: "started"
+              enabled: true
+    - name: command running 
+      ansible.builtin.command:
+       cmd: "docker run -itd -P tonygeorgethomas/addressbook:latest"
