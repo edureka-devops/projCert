@@ -26,7 +26,7 @@ pipeline{
         stage ('Docker-Image-Push'){
             steps{
                     withCredentials([usernamePassword(credentialsId: 'docker-login-edurekaproject', passwordVariable: 'docker-password', usernameVariable: 'docker-username')]) {
-                        echo "username: ${env.docker-username}, password: ${env.docker-password}" 
+                        echo "username: ${docker-username}, password: ${docker-password}" 
                     }
                 }
         }
