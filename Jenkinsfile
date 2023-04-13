@@ -16,12 +16,13 @@ pipeline{
             }
         }
 
-        stage ('Docker-Tag'){
+        stage ('Docker Image Tag'){
             steps{
                 sh 'docker tag $JOB_NAME:1.$BUILD_NUMBER mithunedappulath/$JOB_NAME:1.$BUILD_NUMBER'
                 sh 'docker tag $JOB_NAME:1.$BUILD_NUMBER mithunedappulath/$JOB_NAME:latest'
             }
-
+        }
+        
         stage ('Docker-Image-Push'){
             steps{
                     withCredentials([usernamePassword(credentialsId: 'docker-login-edurekaproject', passwordVariable: 'docker-password', usernameVariable: 'docker-username')]) {
