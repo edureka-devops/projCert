@@ -46,6 +46,8 @@ pipeline{
             steps{
                 sshagent(['QA-Test-Server']) {
                     sh 'ssh -o StrictHostKeyChecking=no -l devopsadmin 172.31.86.57 sudo docker images'
+                    sh 'ssh -o StrictHostKeyChecking=no -l devopsadmin 172.31.86.57 sudo docker rm -f edureka-project'
+                    sh 'ssh -o StrictHostKeyChecking=no -l devopsadmin 172.31.86.57 sudo docker rmi -f mithunedappulath/edureka-project1'
                     sh 'ssh -o StrictHostKeyChecking=no -l devopsadmin 172.31.86.57 sudo docker run -it -d --name edureka-project -p 80:80 mithunedappulath/edureka-project1'
                 }
             }
