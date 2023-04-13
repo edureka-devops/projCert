@@ -18,8 +18,8 @@ pipeline{
 
         stage ('Docker Image Tag'){
             steps{
-                sh 'docker tag $JOB_NAME:1.$BUILD_NUMBER mithunedappulath/$JOB_NAME:V1.$BUILD_NUMBER'
-                sh 'docker tag $JOB_NAME:1.$BUILD_NUMBER mithunedappulath/$JOB_NAME:latest'
+                sh 'docker tag $JOB_NAME:V1.$BUILD_NUMBER mithunedappulath/$JOB_NAME:V1.$BUILD_NUMBER'
+                sh 'docker tag $JOB_NAME:V1.$BUILD_NUMBER mithunedappulath/$JOB_NAME:latest'
                 sh 'docker images'
             }
         }
