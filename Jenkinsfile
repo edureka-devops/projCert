@@ -44,7 +44,10 @@ pipeline{
 
         stage ('Deploy to Test-Server'){
             steps{
-                echo 'Will be deployed soon - Working on'
+                sshagent(['QA-Test-Server']) {
+                    sh 'ssh -o StrictHostKeyChecking=no -l devopsadmin 172.31.86.57 sudo docker images'
+                    sh 'ssh -o StrictHostKeyChecking=no -l devopsadmin 172.31.86.57 sudo docker run -it -d --name edureka-project -p 80:80 mithunedappulath/edureka-project1'
+                }
             }
         }  
         
