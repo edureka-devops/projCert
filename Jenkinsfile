@@ -6,7 +6,7 @@ pipeline{
     stages{
         stage ('git-clone'){
             steps{
-                git branch: 'feature1', url: 'https://github.com/MithunEdappulath/projCert.git'
+                git branch: 'feature2', url: 'https://github.com/MithunEdappulath/projCert.git'
             }
         }
 
