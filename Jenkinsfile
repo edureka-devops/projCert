@@ -26,8 +26,9 @@ pipeline{
         stage ('Docker-Image-Push'){
             steps{
                 withCredentials([usernamePassword(credentialsId: 'edureka-project-docker-login', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
-                    echo "Username: ${env.USERNAME}"
-                    echo "Password: ${env.PASSWORD}"
+                    sh "docker login -u ${env.USERNAME} -p ${env.PASSWORD}"
+                    sh 'docker push mithunedappulath/$JOB_NAME:1.$BUILD_NUMBER'
+                    sh 'docker push mithunedappulath/$JOB_NAME:latest'
                 }
             }
         }
