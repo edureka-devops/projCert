@@ -1,0 +1,18 @@
+- hosts: webservers
+  become: true
+  become_user: root
+  tasks:
+    - name: Remove existing directory
+      file:
+        path: /tmp/website/website
+        state: absent
+
+    - name: Clone repository
+      git:
+        repo: https://github.com/Pranayinfo/projCert.git
+        dest: /tmp/website/website
+
+    - name: Build Docker image
+      command: docker build -t myapp:0.01.test1 /tmp/website/website
+      args:
+        chdir: /tmp/website/website
